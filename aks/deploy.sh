@@ -61,9 +61,6 @@ if [ -z $AKS_RESOURCEID ]; then
         --client-secret "${SP_CLIENTSECRET}" \
         --enable-aad
         --aad-admin-group-object-ids ${AAD_AKSADMINGROUP_ID}
-        --aad-client-app-id "${AAD_CLIENT_APPID}" \
-        --aad-server-app-id "${AAD_SERVER_APPID}" \
-        --aad-server-app-secret "${AAD_SERVER_APPSECRET}" \
         --nodepool-name lin1 \
         --vm-set-type VirtualMachineScaleSets \
         --node-vm-size Standard_DS3_v2 \
