@@ -3,55 +3,54 @@
 # This script is populated through parameters of a AzureDevOps release pipeline.
 
 # Name
-AKSRG="#{ResourceGroup}#"
-AKSNAME="#{ClusterName}#"
-AKSVER="#{KubernetesVersionForNewCluster}#"
+AKSRG="#{RG_NAME}#"
+AKSNAME="#{CLUSTER_NAME}#"
+AKSVER="#{AKS_VER}#"
 
 # Service principal
-SP="#{ServicePrincipalClientID}#"
-SP_CLIENTSECRET="#{ServicePrincipalClientSecret}#"
+SP="#{spClientId}#"
+SP_CLIENTSECRET="#{spClientSecret}#"
 
 # AAD Integration
-AAD_SERVER_APPID="#{AADServerAppId}#"
-AAD_SERVER_APPSECRET="#{AADServerAppSecret}#"
-AAD_CLIENT_APPID="#{AADClientAppId}#"
+AAD_AKSADMINGROUP_ID="#{AADAdminGroupId}#"
+#AAD_SERVER_APPID="#{AADServerAppId}#"
+#AAD_SERVER_APPSECRET="#{AADServerAppSecret}#"
+#AAD_CLIENT_APPID="#{AADClientAppId}#"
 
 # Monitoring
-WORKSPACE_RG=#{OMSWorkspaceResourceGroup}#
-WORKSPACE_NAME=#{OMSWorkspaceName}#
+#WORKSPACE_RG=#{OMSWorkspaceResourceGroup}#
+#WORKSPACE_NAME=#{OMSWorkspaceName}#
 
 # Nodepool
 MIN_NODES=#{ClusterAutoscalerMinNodes}#
 MAX_NODES=#{ClusterAutoscalerMaxNodes}#
 
+
 # Networking
-VNET_RG=#{VnetResourceGroup}#
-VNET_NAME=#{VnetName}#
-SUBNET_NAME=#{SubnetName}#
+#VNET_RG=#{VnetResourceGroup}#
+#VNET_NAME=#{VnetName}#
+#SUBNET_NAME=#{SubnetName}#
 DNS_PREFIX=#{DNSPrefix}#
 DNS_SERVICEIP=#{DNSServiceIP}#
 SERVICE_CIDR="#{ServiceCIDR}#"
 
 # Gather additional information
-WORKSPACE_RESOURCEID=`az monitor log-analytics workspace show -g ${WORKSPACE_RG} -n ${WORKSPACE_NAME} --query id -o tsv`
-echo "Workspace resource id found ${WORKSPACE_RESOURCEID}"
-SUBNET_ID=`az network vnet subnet show -g ${VNET_RG} --vnet-name ${VNET_NAME} --name ${SUBNET_NAME} --query id -o tsv`
-echo "Subnet resource id found ${SUBNET_ID}"
-
-# Create resource group (if not exists)
-az group create -n $AKSRG --location westeurope
+#WORKSPACE_RESOURCEID=`az monitor log-analytics workspace show -g ${WORKSPACE_RG} -n ${WORKSPACE_NAME} --query id -o tsv`
+#echo "Workspace resource id found ${WORKSPACE_RESOURCEID}"
+#SUBNET_ID=`az network vnet subnet show -g ${VNET_RG} --vnet-name ${VNET_NAME} --name ${SUBNET_NAME} --query id -o tsv`
+#echo "Subnet resource id found ${SUBNET_ID}"
 
 # Determine if existing cluster
 AKS_RESOURCEID=`az aks show -n $AKSNAME -g $AKSRG --query id -o tsv`
-if [ -z $AKS_RESOURCEID ]
-then
+
+if [ -z $AKS_RESOURCEID ]; then
     echo "Cluster does not exist and will be created."
 
     # Cluster aanmaken
     # - Cluster monitoring
     # - Azure AD integration
     # - Default node pool (with cluster autoscaling)
-    # - Networking
+    ## - Networking
     # - Multi AZ
     az aks create \
         --no-ssh-key \
@@ -60,8 +59,8 @@ then
         --name $AKSNAME \
         --service-principal "${SP}" \
         --client-secret "${SP_CLIENTSECRET}" \
-        --enable-addons monitoring \
-        --workspace-resource-id "${WORKSPACE_RESOURCEID}" \
+        --enable-aad
+        --aad-admin-group-object-ids ${AAD_AKSADMINGROUP_ID}
         --aad-client-app-id "${AAD_CLIENT_APPID}" \
         --aad-server-app-id "${AAD_SERVER_APPID}" \
         --aad-server-app-secret "${AAD_SERVER_APPSECRET}" \
@@ -76,13 +75,17 @@ then
         --max-count $MAX_NODES \
         --network-plugin azure \
         --network-policy azure \
-        --vnet-subnet-id $SUBNET_ID \
         --docker-bridge-address 172.17.0.1/16 \
         --load-balancer-sku standard \
         --load-balancer-managed-outbound-ip-count 1 \
         --service-cidr $SERVICE_CIDR \
         --dns-service-ip $DNS_SERVICEIP \
         --zones 1 2 3
+
+# Disabled features
+#        --enable-addons monitoring \
+#        --workspace-resource-id "${WORKSPACE_RESOURCEID}" \
+#        --vnet-subnet-id $SUBNET_ID \
 
 else
     echo "Cluster exists and will be updated."
