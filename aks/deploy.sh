@@ -59,8 +59,8 @@ if [ -z $AKS_RESOURCEID ]; then
         --name $AKSNAME \
         --service-principal "${SP}" \
         --client-secret "${SP_CLIENTSECRET}" \
-        --enable-aad
-        --aad-admin-group-object-ids ${AAD_AKSADMINGROUP_ID}
+        --enable-aad \
+        --aad-admin-group-object-ids ${AAD_AKSADMINGROUP_ID} \
         --nodepool-name lin1 \
         --vm-set-type VirtualMachineScaleSets \
         --node-vm-size Standard_DS3_v2 \
