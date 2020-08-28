@@ -13,32 +13,17 @@ SP_CLIENTSECRET="#{spClientSecret}#"
 
 # AAD Integration
 AAD_AKSADMINGROUP_ID="#{AADAdminGroupId}#"
-#AAD_SERVER_APPID="#{AADServerAppId}#"
-#AAD_SERVER_APPSECRET="#{AADServerAppSecret}#"
-#AAD_CLIENT_APPID="#{AADClientAppId}#"
-
-# Monitoring
-#WORKSPACE_RG=#{OMSWorkspaceResourceGroup}#
-#WORKSPACE_NAME=#{OMSWorkspaceName}#
 
 # Nodepool
 MIN_NODES=#{ClusterAutoscalerMinNodes}#
 MAX_NODES=#{ClusterAutoscalerMaxNodes}#
 
-
 # Networking
-#VNET_RG=#{VnetResourceGroup}#
-#VNET_NAME=#{VnetName}#
-#SUBNET_NAME=#{SubnetName}#
 DNS_PREFIX=#{DNSPrefix}#
 DNS_SERVICEIP=#{DNSServiceIP}#
 SERVICE_CIDR="#{ServiceCIDR}#"
 
 # Gather additional information
-#WORKSPACE_RESOURCEID=`az monitor log-analytics workspace show -g ${WORKSPACE_RG} -n ${WORKSPACE_NAME} --query id -o tsv`
-#echo "Workspace resource id found ${WORKSPACE_RESOURCEID}"
-#SUBNET_ID=`az network vnet subnet show -g ${VNET_RG} --vnet-name ${VNET_NAME} --name ${SUBNET_NAME} --query id -o tsv`
-#echo "Subnet resource id found ${SUBNET_ID}"
 
 # Determine if existing cluster
 AKS_RESOURCEID=`az aks show -n $AKSNAME -g $AKSRG --query id -o tsv`
@@ -50,7 +35,6 @@ if [ -z $AKS_RESOURCEID ]; then
     # - Cluster monitoring
     # - Azure AD integration
     # - Default node pool (with cluster autoscaling)
-    ## - Networking
     # - Multi AZ
     az aks create \
         --no-ssh-key \
